@@ -1,10 +1,9 @@
+import net.proteanit.sql.DbUtils;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class Employee {
     private JPanel Main;
@@ -41,8 +40,19 @@ public class Employee {
         }
     }
 
+    void table_load() {
+        try {
+            pst = con.prepareStatement("select * from employee");
+            ResultSet rs = pst.executeQuery();
+            table1.setModel(DbUtils.resultSetToTableModel(rs));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public Employee() {
         connect();
+        table_load();
         saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -71,10 +81,46 @@ public class Employee {
                     el.printStackTrace();
                 }
 
+            }
+        });
+        searchButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String id = textId.getText();
+
+                        pst = con.prepareStatement("select employeeName, employeeSalary, employeePhone from employee " +
+                                "where id = ?");
+                        pst.setString(1, id);
+                        ResultSet rs = pst.executeQuery();
+
+                    if(rs.next() == true) {
+                        String employeeName = rs.getString(1);
+                        String employeeSalary = rs.getString(2);
+                        String employeePhone = rs.getString(3);
+
+                        textName.setText((employeeName));
+                        textSalary.setText(employeeSalary);
+                        textPhone.setText(employeePhone);
+                    } else {
+                        textName.setText("");
+                        textSalary.setText("");
+                        textPhone.setText("");
+                    }
+
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
 
 
 
             }
         });
     }
+
+
+
+
+
+
 }
