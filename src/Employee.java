@@ -1,5 +1,4 @@
 import net.proteanit.sql.DbUtils;
-
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -29,6 +28,7 @@ public class Employee {
     PreparedStatement pst;
 
     public void connect() {
+
         try {
             Class.forName("com.mysql.jdbc.Driver");
             con = DriverManager.getConnection("jdbc:mysql://localhost/mgcompany", "root", "");
@@ -71,8 +71,8 @@ public class Employee {
                     pst.setString(2, employeeSalary);
                     pst.setString(3, employeePhone);
                     pst.executeUpdate();
-                    JOptionPane.showMessageDialog(null, "Record Added!");
-                    // table_load();
+                    JOptionPane.showMessageDialog(null, "Employee Added!");
+                    table_load();
                     textName.setText("");
                     textSalary.setText("");
                     textPhone.setText("");
@@ -87,14 +87,14 @@ public class Employee {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    String id = textId.getText();
+                    String employeeId = textId.getText();
 
                         pst = con.prepareStatement("select employeeName, employeeSalary, employeePhone from employee " +
                                 "where id = ?");
-                        pst.setString(1, id);
+                        pst.setString(1, employeeId);
                         ResultSet rs = pst.executeQuery();
 
-                    if(rs.next() == true) {
+                    if(rs.next()) {
                         String employeeName = rs.getString(1);
                         String employeeSalary = rs.getString(2);
                         String employeePhone = rs.getString(3);
@@ -106,6 +106,7 @@ public class Employee {
                         textName.setText("");
                         textSalary.setText("");
                         textPhone.setText("");
+                        JOptionPane.showMessageDialog(null, "Invalid employeee Id");
                     }
 
                 } catch (SQLException ex) {
@@ -114,6 +115,64 @@ public class Employee {
 
 
 
+            }
+        });
+        updateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                String employeeName, employeeSalary, employeePhone, employeeId;
+
+                    employeeName = textName.getText();
+                    employeeSalary = textSalary.getText();
+                    employeePhone = textPhone.getText();
+                    employeeId = textId.getText();
+
+                    try {
+                        pst = con.prepareStatement("update employee set employeeName = ?, employeeSalary = ?, " +
+                                "employeePhone = ? where id = ?");
+                        pst.setString(1, employeeName);
+                        pst.setString(2, employeeSalary);
+                        pst.setString(3, employeePhone);
+                        pst.setString(4, employeeId);
+
+                        pst.executeUpdate();
+                        JOptionPane.showMessageDialog(null, "Employee updated!");
+                        table_load();
+                        textName.setText("");
+                        textSalary.setText("");
+                        textPhone.setText("");
+                        textName.requestFocus();
+
+                    } catch (SQLException el) {
+                        el.printStackTrace();
+                    }
+
+            }
+        });
+        deleteButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                String employeeId;
+
+                employeeId = textId.getText();
+
+                try {
+                    pst = con.prepareStatement("delete from employee where id = ?");
+                    pst.setString(1, employeeId);
+                    pst.executeUpdate();
+                    JOptionPane.showMessageDialog(null, "Employee deleted!");
+                    table_load();
+                    textName.setText("");
+                    textSalary.setText("");
+                    textPhone.setText("");
+                    textName.requestFocus();
+                    textId.setText("");
+
+                } catch (Exception el) {
+                    el.printStackTrace();
+                }
             }
         });
     }
